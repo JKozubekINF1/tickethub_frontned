@@ -11,9 +11,17 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
         node-version: [18.x, 20.x]
-        # Testujemy na Node 18 i 20 (standardowe wersje LTS)
+
+    # --- SEKCJA DEFAULTS (Jeśli projekt jest w podkatalogu) ---
+    # Jeśli plik package.json leży luzem w głównym katalogu repozytorium, USUŃ tę sekcję.
+    # Jeśli jest w folderze, wpisz jego nazwę poniżej.
+    defaults:
+      run:
+        working-directory: ./TICKETHUB_FRONTEND  # <--- ZMIEŃ NA NAZWĘ SWOJEGO FOLDERU
+    # ----------------------------------------------------------
 
     steps:
     - uses: actions/checkout@v4
@@ -22,16 +30,16 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
+        # Ważne: Jeśli używasz working-directory, musisz podać ścieżkę do lockfile dla cache
         cache: 'npm'
+        cache-dependency-path: './TICKETHUB_FRONTEND/package-lock.json' # <--- ZMIEŃ TEŻ TUTAJ
 
-    # 1. Instalacja zależności (szybciej i bezpieczniej niż npm install)
     - name: Install dependencies
       run: npm ci
+      # npm ci WYMAGA istnienia package-lock.json w repozytorium
 
-    # 2. Próba zbudowania projektu (sprawdza czy nie ma błędów kompilacji)
     - name: Build
       run: npm run build --if-present
 
-    # 3. Uruchomienie testów (Vitest)
     - name: Test
       run: npm run test
