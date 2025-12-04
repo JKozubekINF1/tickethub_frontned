@@ -1,0 +1,37 @@
+name: Vue Frontend CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+        # Testujemy na Node 18 i 20 (standardowe wersje LTS)
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    # 1. Instalacja zależności (szybciej i bezpieczniej niż npm install)
+    - name: Install dependencies
+      run: npm ci
+
+    # 2. Próba zbudowania projektu (sprawdza czy nie ma błędów kompilacji)
+    - name: Build
+      run: npm run build --if-present
+
+    # 3. Uruchomienie testów (Vitest)
+    - name: Test
+      run: npm run test
