@@ -15,13 +15,11 @@ jobs:
       matrix:
         node-version: [18.x, 20.x]
 
-    # --- SEKCJA DEFAULTS (Jeśli projekt jest w podkatalogu) ---
-    # Jeśli plik package.json leży luzem w głównym katalogu repozytorium, USUŃ tę sekcję.
-    # Jeśli jest w folderze, wpisz jego nazwę poniżej.
+    # --- KLUCZOWA ZMIANA: Ścieżka do Twojego folderu ---
     defaults:
       run:
-        working-directory: ./TICKETHUB_FRONTEND  # <--- ZMIEŃ NA NAZWĘ SWOJEGO FOLDERU
-    # ----------------------------------------------------------
+        working-directory: ./tickethub-frontend/tickethub-frontend
+    # ---------------------------------------------------
 
     steps:
     - uses: actions/checkout@v4
@@ -30,13 +28,12 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
-        # Ważne: Jeśli używasz working-directory, musisz podać ścieżkę do lockfile dla cache
         cache: 'npm'
-        cache-dependency-path: './TICKETHUB_FRONTEND/package-lock.json' # <--- ZMIEŃ TEŻ TUTAJ
+        # Tutaj też musimy podać pełną ścieżkę do pliku lock, żeby cache działał
+        cache-dependency-path: './tickethub-frontend/tickethub-frontend/package-lock.json'
 
     - name: Install dependencies
       run: npm ci
-      # npm ci WYMAGA istnienia package-lock.json w repozytorium
 
     - name: Build
       run: npm run build --if-present
