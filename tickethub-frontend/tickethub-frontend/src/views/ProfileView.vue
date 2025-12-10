@@ -48,7 +48,17 @@
     <div v-if="showConfirmModal" class="modal-overlay">
       <div class="modal-card">
         <h3>Potwierdzenie</h3>
+        
         <p>Czy na pewno chcesz anulować ten bilet?</p>
+
+        <div v-if="partnerTicket" class="sofa-warning">
+          <p class="warning-header">⚠️ Anulujesz bilet z kanapy!</p>
+          <p>Wraz z anulowaniem tego biletu anuluje się również:</p>
+          <div class="partner-info">
+            <p>Miejsce nr: <strong>{{ partnerTicket.numerMiejsca }}</strong></p>
+          </div>
+        </div>
+
         <p class="warning-text">Tej operacji nie można cofnąć.</p>
         
         <div class="modal-actions">
@@ -89,6 +99,7 @@ const errorTickets = ref(null);
 const showConfirmModal = ref(false);
 const showMessageModal = ref(false);
 const ticketIdToDelete = ref(null);
+const partnerTicket = ref(null); 
 const isCancelling = ref(false);
 const messageText = ref('');
 const isError = ref(false);
@@ -115,6 +126,23 @@ onMounted(async () => {
 
 const openConfirmModal = (id) => {
   ticketIdToDelete.value = id;
+  partnerTicket.value = null; 
+
+  const currentTicket = tickets.value.find(t => t.id === id);
+  if (currentTicket && currentTicket.numerMiejsca > 80) {
+      const seatNum = currentTicket.numerMiejsca;
+      const partnerSeatNum = seatNum % 2 !== 0 ? seatNum + 1 : seatNum - 1;
+      
+      const foundPartner = tickets.value.find(t => 
+        t.seansId === currentTicket.seansId && 
+        t.numerMiejsca === partnerSeatNum
+      );
+
+      if (foundPartner) {
+        partnerTicket.value = foundPartner;
+      }
+  }
+
   showConfirmModal.value = true;
 };
 
@@ -123,9 +151,19 @@ const confirmCancellation = async () => {
 
   isCancelling.value = true;
 
+  const partnerIdToDelete = partnerTicket.value ? partnerTicket.value.id : null;
+
   try {
     await apiClient.delete(`/Bilety/anuluj/${ticketIdToDelete.value}`);
-    tickets.value = tickets.value.filter(t => t.id !== ticketIdToDelete.value);
+
+    let idsToRemove = [ticketIdToDelete.value];
+
+    if (partnerIdToDelete) {
+        idsToRemove.push(partnerIdToDelete);
+    }
+
+    tickets.value = tickets.value.filter(t => !idsToRemove.includes(t.id));
+    
     showConfirmModal.value = false;
   } catch (err) {
     showConfirmModal.value = false;
@@ -134,12 +172,14 @@ const confirmCancellation = async () => {
   } finally {
     isCancelling.value = false;
     ticketIdToDelete.value = null;
+    partnerTicket.value = null;
   }
 };
 
 const closeModal = () => {
   showConfirmModal.value = false;
   ticketIdToDelete.value = null;
+  partnerTicket.value = null;
 };
 
 const showMessage = (text, error = false) => {
@@ -267,6 +307,30 @@ const formatDate = (dateString) => {
   color: #ff9900 !important;
   font-size: 0.9em !important;
   margin-bottom: 20px;
+}
+
+.sofa-warning {
+  background-color: rgba(255, 153, 0, 0.1);
+  border: 1px solid #ff9900;
+  padding: 15px;
+  border-radius: 6px;
+  margin: 15px 0;
+  text-align: left;
+}
+.sofa-warning .warning-header {
+  color: #ff9900;
+  font-weight: bold;
+  margin-top: 0;
+}
+.sofa-warning .partner-info {
+  margin-top: 10px;
+  padding-left: 10px;
+  border-left: 3px solid #ff9900;
+}
+.sofa-warning .partner-info p {
+  margin: 0;
+  color: #fff;
+  font-size: 1em;
 }
 
 .modal-actions {

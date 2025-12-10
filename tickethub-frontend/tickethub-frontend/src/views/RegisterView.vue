@@ -7,11 +7,12 @@
         <label for="username">Nazwa użytkownika</label>
         <input type="text" id="username" v-model="username" required>
       </div>
+
       <div class="form-group">
         <label for="email">Email</label>
         <input type="email" id="email" v-model="email" required>
       </div>
-      
+
       <div class="form-group">
         <label for="password">Hasło</label>
         <div class="password-wrapper">
@@ -28,8 +29,21 @@
         </div>
       </div>
 
+      <div class="form-group">
+        <label for="confirmPassword">Potwierdź hasło</label>
+        <div class="password-wrapper">
+          <input 
+            :type="showPassword ? 'text' : 'password'" 
+            id="confirmPassword" 
+            v-model="confirmPassword" 
+            required
+          >
+        </div>
+      </div>
+
       <button type="submit" class="ph-button">Zarejestruj</button>
-       <div class="switch-form">
+
+      <div class="switch-form">
         Masz już konto? <router-link to="/login">Zaloguj się</router-link>
       </div>
     </form>
@@ -56,7 +70,9 @@ import apiClient from '../api';
 const username = ref('');
 const email = ref('');
 const password = ref('');
+const confirmPassword = ref('');
 const showPassword = ref(false);
+
 const router = useRouter();
 
 const showMessageModal = ref(false);
@@ -64,23 +80,31 @@ const messageText = ref('');
 const isError = ref(false);
 
 async function handleRegister() {
-    try {
-        await apiClient.post('/Auth/register', {
-            username: username.value,
-            email: email.value,
-            password: password.value
-        });
-        
-        isError.value = false;
-        messageText.value = "Rejestracja pomyślna! Możesz się teraz zalogować.";
-        showMessageModal.value = true;
-        
-    } catch (err) {
-        isError.value = true;
-        messageText.value = err.response?.data || 'Wystąpił błąd podczas rejestracji.';
-        showMessageModal.value = true;
-        console.error(err);
-    }
+
+  if (password.value !== confirmPassword.value) {
+    isError.value = true;
+    messageText.value = "Hasła nie są takie same!";
+    showMessageModal.value = true;
+    return;
+  }
+
+  try {
+      await apiClient.post('/Auth/register', {
+          username: username.value,
+          email: email.value,
+          password: password.value
+      });
+      
+      isError.value = false;
+      messageText.value = "Rejestracja pomyślna! Możesz się teraz zalogować.";
+      showMessageModal.value = true;
+
+  } catch (err) {
+      isError.value = true;
+      messageText.value = err.response?.data || 'Wystąpił błąd podczas rejestracji.';
+      showMessageModal.value = true;
+      console.error(err);
+  }
 }
 
 function closeMessageModal() {

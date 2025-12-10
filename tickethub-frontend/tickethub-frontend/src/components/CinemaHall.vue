@@ -177,6 +177,7 @@ const handleReservation = async () => {
 .seat.sofa { width: calc(28px * 2 + 8px); background-color: #9b59b6; }
 .seat.sofa:not(.occupied):hover { background-color: #8e44ad; }
 .seat.sofa.selected { background-color: #4CAF50; }
+.seat.sofa.occupied { background-color: #e74c3c !important;}
 .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem; padding-top: 1rem; border-top: 1px solid #444; }
 .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; }
 .seat-indicator { width: 18px; height: 18px; border-radius: 4px; }
