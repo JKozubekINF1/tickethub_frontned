@@ -22,6 +22,10 @@
           <div v-for="ticket in tickets" :key="ticket.id" class="ticket-card">
             <div class="ticket-header">{{ ticket.seansTytul }}</div>
             <div class="ticket-body">
+              <p class="ticket-code-row">
+                <strong>KOD BILETU:</strong> 
+                <span class="code-highlight">{{ ticket.kodBiletu }}</span>
+              </p>
               <p><strong>Data:</strong> {{ formatDate(ticket.seansData) }}</p>
               <p><strong>Godzina:</strong> {{ ticket.seansGodzina }}</p>
               <p><strong>Miejsce:</strong> {{ ticket.numerMiejsca }}</p>
@@ -243,6 +247,22 @@ const formatDate = (dateString) => {
 .ticket-body { padding: 15px; }
 .ticket-body p { margin: 0 0 10px; color: #b0b0b0; }
 .ticket-body strong { color: #fff; }
+
+.ticket-code-row {
+  margin-bottom: 15px !important;
+  font-size: 1.1em;
+  border-bottom: 1px dashed #333;
+  padding-bottom: 10px;
+}
+.code-highlight {
+  color: #ff9900;
+  font-family: monospace;
+  font-size: 1.4em;
+  font-weight: bold;
+  letter-spacing: 2px;
+  margin-left: 10px;
+}
+
 .ticket-footer {
   padding: 15px;
   background-color: #121212;
@@ -361,6 +381,7 @@ const formatDate = (dateString) => {
   padding: 10px 20px;
   border-radius: 4px;
   cursor: pointer;
+  font-weight: bold;
 }
 .btn-danger:hover { background-color: #b71c1c; }
 
