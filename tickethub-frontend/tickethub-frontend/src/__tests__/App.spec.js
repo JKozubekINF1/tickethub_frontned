@@ -22,13 +22,24 @@ vi.mock('vue-router', () => ({
   RouterView: { template: '<div></div>' }
 }))
 
+const mountOptions = {
+  global: {
+    stubs: {
+      RouterLink: { template: '<a><slot /></a>' },
+      RouterView: { template: '<div></div>' },
+      LoginView: true,
+      RegisterView: true
+    }
+  }
+}
+
 describe('App.vue', () => {
 
   it('pokazuje linki Logowania/Rejestracji gdy niezalogowany', () => {
     mocks.userState.token = null 
     mocks.userState.username = null
 
-    const wrapper = mount(App)
+    const wrapper = mount(App, mountOptions)
     
     const navText = wrapper.find('nav').text()
     expect(navText).toContain('Zaloguj się')
@@ -40,7 +51,7 @@ describe('App.vue', () => {
     mocks.userState.token = 'fake-token'
     mocks.userState.username = 'TestUser'
     
-    const wrapper = mount(App)
+    const wrapper = mount(App, mountOptions)
     
     const navText = wrapper.find('nav').text()
     expect(navText).toContain('Profil (TestUser)')
@@ -50,7 +61,7 @@ describe('App.vue', () => {
 
   it('otwiera modal potwierdzenia przy wylogowaniu', async () => {
     mocks.userState.token = 'fake-token'
-    const wrapper = mount(App)
+    const wrapper = mount(App, mountOptions)
 
     const logoutLink = wrapper.findAll('a').filter(w => w.text() === 'Wyloguj')[0]
     await logoutLink.trigger('click')

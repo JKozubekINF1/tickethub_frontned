@@ -26,7 +26,7 @@
 
       <button type="submit" class="ph-button">Zaloguj</button>
       <div class="switch-form">
-        Nie masz konta? <router-link to="/register">Zarejestruj się</router-link>
+        Nie masz konta? <a href="#" @click.prevent="$emit('switch-to-register')">Zarejestruj się</a>
       </div>
     </form>
 
@@ -44,14 +44,13 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
 import apiClient from '../api';
 import { useAuth } from '../auth';
 
+const emit = defineEmits(['success', 'switch-to-register']);
 const username = ref('');
 const password = ref('');
 const showPassword = ref(false);
-const router = useRouter();
 const { login } = useAuth();
 
 const showErrorModal = ref(false);
@@ -64,7 +63,7 @@ async function handleLogin() {
       password: password.value
     });
     login(response.data.token, response.data.username);
-    router.push('/profile');
+    emit('success');
   } catch (err) {
     errorMessage.value = 'Nieprawidłowa nazwa użytkownika lub hasło.';
     showErrorModal.value = true;
@@ -116,17 +115,21 @@ function closeErrorModal() {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 3000;
 }
+
 .modal-card {
   background-color: #1a1a1a;
-  border: 1px solid #ff9900;
+  border: none;
   padding: 30px;
-  border-radius: 8px;
+  border-radius: 12px;
   width: 90%;
   max-width: 400px;
-  box-shadow: 0 0 20px rgba(255, 153, 0, 0.2);
   text-align: center;
+  box-shadow: 
+    0 10px 30px rgba(0,0,0,0.8),
+    0 0 20px rgba(255, 153, 0, 0.6),
+    0 0 60px rgba(255, 153, 0, 0.4);
 }
 .modal-card h3 { margin-top: 0; color: #fff; }
 .modal-card p { color: #ccc; font-size: 1.1em; }
@@ -142,4 +145,6 @@ function closeErrorModal() {
 }
 .btn-primary:hover { background-color: #e68a00; }
 .text-error { color: #d32f2f; }
+.switch-form a { color: #ff9900; text-decoration: none; font-weight: bold; }
+.switch-form a:hover { text-decoration: underline; }
 </style>

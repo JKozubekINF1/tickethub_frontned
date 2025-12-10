@@ -70,7 +70,7 @@ describe('RegisterView.vue', () => {
     expect(mocks.post).not.toHaveBeenCalled()
   })
 
-  it('obsługuje poprawną rejestrację (gdy hasła są takie same)', async () => {
+  it('obsługuje poprawną rejestrację (emituje zdarzenie switch-to-login)', async () => {
     const wrapper = mount(RegisterView)
 
     await wrapper.find('input#username').setValue('nowyuser')
@@ -84,9 +84,10 @@ describe('RegisterView.vue', () => {
     const modal = wrapper.find('.modal-card')
     expect(modal.exists()).toBe(true)
     expect(modal.text()).toContain('Sukces')
-    
+
     await wrapper.find('.btn-primary').trigger('click')
-    expect(mocks.push).toHaveBeenCalledWith('/login')
+
+    expect(wrapper.emitted()).toHaveProperty('switch-to-login')
   })
 
   it('obsługuje błąd z API (np. email zajęty)', async () => {

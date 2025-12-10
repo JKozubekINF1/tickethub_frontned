@@ -22,14 +22,34 @@
         </template>
         
         <template v-else>
-          <router-link to="/login">Zaloguj się</router-link>
-          <router-link to="/register">Zarejestruj się</router-link>
+          <a href="#" @click.prevent="openLoginModal">Zaloguj się</a>
+          <a href="#" @click.prevent="openRegisterModal">Zarejestruj się</a>
         </template>
       </nav>
     </header>
     <main class="app-main">
       <router-view/>
     </main>
+
+    <div v-if="showLogin" class="modal-overlay" @click.self="closeModals">
+      <div class="modal-card auth-modal">
+        <button class="close-modal-btn" @click="closeModals">×</button>
+        <LoginView 
+          @success="handleLoginSuccess" 
+          @switch-to-register="switchToRegister"
+        />
+      </div>
+    </div>
+
+    <div v-if="showRegister" class="modal-overlay" @click.self="closeModals">
+      <div class="modal-card auth-modal">
+        <button class="close-modal-btn" @click="closeModals">×</button>
+        <RegisterView 
+          @success="handleRegisterSuccess" 
+          @switch-to-login="switchToLogin"
+        />
+      </div>
+    </div>
 
     <div v-if="showLogoutModal" class="modal-overlay">
       <div class="modal-card">
@@ -50,11 +70,16 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { userState, useAuth } from './auth';
+import LoginView from './views/LoginView.vue';
+import RegisterView from './views/RegisterView.vue';
 
 const isMenuOpen = ref(false);
 const showLogoutModal = ref(false);
 const { logout } = useAuth();
 const router = useRouter();
+
+const showLogin = ref(false);
+const showRegister = ref(false);
 
 function toggleMenu() {
   isMenuOpen.value = !isMenuOpen.value;
@@ -72,7 +97,42 @@ function closeLogoutModal() {
 function confirmLogout() {
   logout();
   showLogoutModal.value = false;
-  router.push('/login');
+  router.push('/');
+}
+
+function openLoginModal() {
+  showLogin.value = true;
+  showRegister.value = false;
+  isMenuOpen.value = false;
+}
+
+function openRegisterModal() {
+  showRegister.value = true;
+  showLogin.value = false;
+  isMenuOpen.value = false;
+}
+
+function closeModals() {
+  showLogin.value = false;
+  showRegister.value = false;
+}
+
+function switchToRegister() {
+  showLogin.value = false;
+  showRegister.value = true;
+}
+
+function switchToLogin() {
+  showRegister.value = false;
+  showLogin.value = true;
+}
+
+function handleLoginSuccess() {
+  closeModals();
+}
+
+function handleRegisterSuccess() {
+  switchToLogin();
 }
 </script>
 
@@ -163,22 +223,41 @@ body { margin: 0; font-family: sans-serif; background-color: #000000; color: #ff
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  backdrop-filter: blur(8px);
 }
+
 .modal-card {
   background-color: #1a1a1a;
-  border: 1px solid #ff9900;
+  border: none;
   padding: 30px;
-  border-radius: 8px;
+  border-radius: 12px;
   width: 90%;
   max-width: 400px;
-  box-shadow: 0 0 20px rgba(255, 153, 0, 0.2);
   text-align: center;
+  box-shadow: 
+    0 10px 30px rgba(0,0,0,0.8),
+    0 0 20px rgba(255, 153, 0, 0.6),
+    0 0 60px rgba(255, 153, 0, 0.4);
+  transition: transform 0.3s ease, box-shadow 0.3s ease; 
+  border-top: 3px solid rgba(255, 255, 255, 0.15); 
+  border-left: 3px solid rgba(255, 255, 255, 0.1);
+  border-right: 3px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 3px solid rgba(255, 255, 255, 0.1);
 }
+
+.modal-card:hover {
+   transform: translateY(-2px);
+   box-shadow: 
+    0 15px 35px rgba(0,0,0,0.9),
+    0 0 25px rgba(255, 153, 0, 0.7),
+    0 0 70px rgba(255, 153, 0, 0.5);
+}
+
 .modal-card h3 { margin-top: 0; color: #fff; }
 .modal-card p { color: #ccc; font-size: 1.1em; }
 .modal-actions { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
@@ -203,4 +282,42 @@ body { margin: 0; font-family: sans-serif; background-color: #000000; color: #ff
   font-weight: bold;
 }
 .btn-primary:hover { background-color: #e68a00; }
+
+.auth-modal {
+  max-width: 450px;
+  width: 90%;
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+}
+
+.close-modal-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 20;
+  transition: color 0.2s;
+}
+.close-modal-btn:hover { color: #ff9900; }
+
+.auth-modal .auth-container {
+  min-height: auto;
+  padding: 40px 30px 30px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.auth-modal .auth-form {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  width: 100%;
+  padding: 0;
+}
 </style>

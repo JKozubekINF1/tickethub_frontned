@@ -44,12 +44,12 @@
       <button type="submit" class="ph-button">Zarejestruj</button>
 
       <div class="switch-form">
-        Masz już konto? <router-link to="/login">Zaloguj się</router-link>
+        Masz już konto? <a href="#" @click.prevent="$emit('switch-to-login')">Zaloguj się</a>
       </div>
     </form>
 
     <div v-if="showMessageModal" class="modal-overlay">
-      <div class="modal-card">
+      <div class="modal-card" :class="{'error-glow': isError, 'success-glow': !isError}">
         <h3 :class="{'text-error': isError, 'text-success': !isError}">
           {{ isError ? 'Błąd' : 'Sukces' }}
         </h3>
@@ -64,16 +64,14 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
 import apiClient from '../api';
 
+const emit = defineEmits(['success', 'switch-to-login']);
 const username = ref('');
 const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 const showPassword = ref(false);
-
-const router = useRouter();
 
 const showMessageModal = ref(false);
 const messageText = ref('');
@@ -110,7 +108,7 @@ async function handleRegister() {
 function closeMessageModal() {
   showMessageModal.value = false;
   if (!isError.value) {
-    router.push('/login');
+    emit('switch-to-login');
   }
 }
 </script>
@@ -155,18 +153,35 @@ function closeMessageModal() {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 3000;
 }
+
 .modal-card {
   background-color: #1a1a1a;
-  border: 1px solid #ff9900;
+  border: none;
   padding: 30px;
-  border-radius: 8px;
+  border-radius: 12px;
   width: 90%;
   max-width: 400px;
-  box-shadow: 0 0 20px rgba(255, 153, 0, 0.2);
   text-align: center;
+  box-shadow: 
+    0 10px 30px rgba(0,0,0,0.8),
+    0 0 20px rgba(255, 153, 0, 0.6);
 }
+
+.error-glow {
+  box-shadow: 
+    0 10px 30px rgba(0,0,0,0.8),
+    0 0 20px rgba(255, 50, 50, 0.6),
+    0 0 60px rgba(255, 50, 50, 0.4);
+}
+.success-glow {
+   box-shadow: 
+    0 10px 30px rgba(0,0,0,0.8),
+    0 0 20px rgba(50, 255, 50, 0.6),
+    0 0 60px rgba(50, 255, 50, 0.4);
+}
+
 .modal-card h3 { margin-top: 0; color: #fff; }
 .modal-card p { color: #ccc; font-size: 1.1em; }
 .modal-actions.center { display: flex; justify-content: center; margin-top: 20px; }
@@ -182,4 +197,6 @@ function closeMessageModal() {
 .btn-primary:hover { background-color: #e68a00; }
 .text-error { color: #d32f2f; }
 .text-success { color: #4caf50; }
+.switch-form a { color: #ff9900; text-decoration: none; font-weight: bold; }
+.switch-form a:hover { text-decoration: underline; }
 </style>
